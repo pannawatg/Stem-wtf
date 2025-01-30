@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polynomial Graph Plotter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #input-container {
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid black;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Polynomial Graph Plotter</h1>
+    
+    <div id="input-container">
+        <label for="polynomial">Enter Polynomial (e.g., 2x^2 + 3x + 1): </label>
+        <input type="text" id="polynomial" placeholder="e.g., 2x^2 + 3x + 1">
+        <button id="plot">Plot Graph</button>
+    </div>
+
+    <canvas id="graph" width="500" height="400"></canvas>
+    
+    <div id="result"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
