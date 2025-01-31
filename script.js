@@ -63,8 +63,9 @@ function plotGraph(coefficients, tangentX = null) {
 function plotTangentLine(ctx, centerX, centerY, scale, x0, y0, slope) {
     const xCanvas = x => centerX + x * scale;
     const yCanvas = y => centerY - y * scale;
-    const xStart = -10;
-    const xEnd = 10;
+
+    const xStart = x0 - 10;
+    const xEnd = x0 + 10;
     const yStart = y0 + slope * (xStart - x0);
     const yEnd = y0 + slope * (xEnd - x0);
 
