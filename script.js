@@ -1,106 +1,76 @@
+// Function to parse the coefficients from the user's input
 function parseCoefficients(input) {
     try {
+        // Parse the input string into an array
         const coefficients = JSON.parse(input);
+
+        // Validate the input (must be an array of numbers)
         if (!Array.isArray(coefficients) || coefficients.some(isNaN)) {
             throw new Error("Invalid input! Please enter a list of numbers.");
         }
-        return coefficients;
+
+        return coefficients; // Return as-is since input order matches decreasing powers
     } catch (error) {
         alert("Invalid input! Please enter coefficients as a list (e.g., [3, 2, 1]).");
         throw error;
     }
 }
 
-function evaluatePolynomial(x, coefficients) {
-    return coefficients.reduce((acc, coef, index) => {
-        const degree = coefficients.length - 1 - index;
-        return acc + coef * Math.pow(x, degree);
-    }, 0);
-}
-
-function computeDerivative(coefficients) {
-    const derivative = [];
-    for (let i = 0; i < coefficients.length - 1; i++) {
-        const degree = coefficients.length - 1 - i;
-        derivative.push(coefficients[i] * degree);
-    }
-    return derivative;
-}
-
-function plotGraph(coefficients, tangentX = null) {
+// Function to plot the graph of the polynomial
+function plotGraph() {
+    const input = document.getElementById('coefficients').value;
     const canvas = document.getElementById('graph');
     const ctx = canvas.getContext('2d');
+    
+    let coefficients;
+
+    try {
+        coefficients = parseCoefficients(input); // Get coefficients from input
+    } catch (error) {
+        return; // Stop if input is invalid
+    }
+
+    // Clear the canvas before drawing the new graph
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Set up axis
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const scale = 20;
-
+    const scale = 10; // 10 pixels per unit
+    
     ctx.beginPath();
     ctx.moveTo(0, centerY);
-    ctx.lineTo(canvas.width, centerY);
+    ctx.lineTo(canvas.width, centerY); // X axis
     ctx.moveTo(centerX, 0);
-    ctx.lineTo(centerX, canvas.height);
+    ctx.lineTo(centerX, canvas.height); // Y axis
     ctx.strokeStyle = 'black';
     ctx.stroke();
-
+    
+    // Graph the polynomial function
     ctx.beginPath();
     ctx.moveTo(0, centerY - evaluatePolynomial(-centerX / scale, coefficients) * scale);
+
+    // Plot points for a range of x values
     for (let x = -centerX; x <= centerX; x++) {
-        const y = evaluatePolynomial(x / scale, coefficients);
+        const y = evaluatePolynomial(x / scale, coefficients); // scale x to fit in the canvas
         ctx.lineTo(centerX + x, centerY - y * scale);
     }
+
     ctx.strokeStyle = 'blue';
     ctx.stroke();
-
-    if (tangentX !== null) {
-        const derivative = computeDerivative(coefficients);
-        const slope = evaluatePolynomial(tangentX, derivative);
-        const tangentY = evaluatePolynomial(tangentX, coefficients);
-        plotTangentLine(ctx, centerX, centerY, scale, tangentX, tangentY, slope);
-    }
 }
 
-function plotTangentLine(ctx, centerX, centerY, scale, x0, y0, slope) {
-    const xCanvas = x => centerX + x * scale;
-    const yCanvas = y => centerY - y * scale;
+// Function to evaluate the polynomial at a given x
+function evaluatePolynomial(x, coefficients) {
+    let result = 0;
+    const degree = coefficients.length - 1;
 
-    const xStart = x0 - 10;
-    const xEnd = x0 + 10;
-    const yStart = y0 + slope * (xStart - x0);
-    const yEnd = y0 + slope * (xEnd - x0);
+    for (let i = 0; i < coefficients.length; i++) {
+        result += coefficients[i] * Math.pow(x, degree - i); // Use degree - i for descending powers
+    }
 
-    ctx.beginPath();
-    ctx.moveTo(xCanvas(xStart), yCanvas(yStart));
-    ctx.lineTo(xCanvas(xEnd), yCanvas(yEnd));
-    ctx.strokeStyle = 'red';
-    ctx.setLineDash([5, 5]);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    return result;
 }
 
-document.getElementById('plot').addEventListener('click', () => {
-    const input = document.getElementById('coefficients').value;
-    let coefficients;
-    try {
-        coefficients = parseCoefficients(input);
-    } catch (error) {
-        return;
-    }
-    plotGraph(coefficients);
-});
-
-document.getElementById('plot-tangent').addEventListener('click', () => {
-    const input = document.getElementById('coefficients').value;
-    const tangentX = parseFloat(document.getElementById('tangent-x').value);
-    if (isNaN(tangentX)) {
-        alert("Please enter a valid x-value for the tangent line.");
-        return;
-    }
-    let coefficients;
-    try {
-        coefficients = parseCoefficients(input);
-    } catch (error) {
-        return;
-    }
-    plotGraph(coefficients, tangentX);
-});
+// Event listener for the "Plot Graph" button
+document.getElementById('plot').addEventListener('click', plotGraph);
