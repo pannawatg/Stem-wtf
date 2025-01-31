@@ -1,32 +1,35 @@
-// Helper function to parse polynomial string into a list of terms
-function parsePolynomial(input) {
-    const terms = input.replace(/\s+/g, '').split(/(?=[+-])/); // Split by terms with + or -
-    const coefficients = [];
-    
-    terms.forEach(term => {
-        const match = term.match(/([+-]?\d*)(x(?:\^(\d+))?)?/);
-        if (match) {
-            let coef = parseInt(match[1] || 1); // Default to 1 or -1 for x if no coefficient
-            let exponent = match[3] ? parseInt(match[3]) : (match[2] ? 1 : 0); // If there's no x, it's exponent 0
-            
-            // Store the coefficient at the corresponding exponent index
-            coefficients[exponent] = (coefficients[exponent] || 0) + coef;
-        }
-    });
+// Function to parse the coefficients from the user's input
+function parseCoefficients(input) {
+    try {
+        // Parse the input string into an array
+        const coefficients = JSON.parse(input);
 
-    // Return the coefficients array, e.g., [3, 2, -1] for 3x^2 + 2x - 1
-    return coefficients;
+        // Validate the input (must be an array of numbers)
+        if (!Array.isArray(coefficients) || coefficients.some(isNaN)) {
+            throw new Error("Invalid input! Please enter a list of numbers.");
+        }
+
+        return coefficients; // Return as-is since input order matches decreasing powers
+    } catch (error) {
+        alert("Invalid input! Please enter coefficients as a list (e.g., [3, 2, 1]).");
+        throw error;
+    }
 }
 
 // Function to plot the graph of the polynomial
 function plotGraph() {
-    const input = document.getElementById('polynomial').value;
+    const input = document.getElementById('coefficients').value;
     const canvas = document.getElementById('graph');
     const ctx = canvas.getContext('2d');
     
-    // Parse the polynomial into coefficients
-    const coefficients = parsePolynomial(input);
-    
+    let coefficients;
+
+    try {
+        coefficients = parseCoefficients(input); // Get coefficients from input
+    } catch (error) {
+        return; // Stop if input is invalid
+    }
+
     // Clear the canvas before drawing the new graph
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -45,7 +48,7 @@ function plotGraph() {
     
     // Graph the polynomial function
     ctx.beginPath();
-    ctx.moveTo(0, centerY - evaluatePolynomial(0, coefficients) * scale);
+    ctx.moveTo(0, centerY - evaluatePolynomial(-centerX / scale, coefficients) * scale);
 
     // Plot points for a range of x values
     for (let x = -centerX; x <= centerX; x++) {
@@ -60,9 +63,12 @@ function plotGraph() {
 // Function to evaluate the polynomial at a given x
 function evaluatePolynomial(x, coefficients) {
     let result = 0;
+    const degree = coefficients.length - 1;
+
     for (let i = 0; i < coefficients.length; i++) {
-        result += coefficients[i] * Math.pow(x, i);
+        result += coefficients[i] * Math.pow(x, degree - i); // Use degree - i for descending powers
     }
+
     return result;
 }
 
